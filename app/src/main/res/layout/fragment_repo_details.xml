@@ -51,7 +51,6 @@
                 android:id="@+id/readme_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center_horizontal"
                 android:textColor="#292929"
                 android:textSize="16dp" />
         </LinearLayout>
