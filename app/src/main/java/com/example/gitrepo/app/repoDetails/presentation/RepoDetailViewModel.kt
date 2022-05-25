@@ -7,9 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.gitrepo.ViewState
 import com.example.gitrepo.common.Resources
 import com.example.gitrepo.domain.model.Readme
-import com.example.gitrepo.domain.model.Repo
 import com.example.gitrepo.domain.useCases.getReadme.GetReadmeUseCase
-import com.example.gitrepo.domain.useCases.getRepos.GetReposUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
@@ -28,14 +26,13 @@ class RepoDetailViewModel @Inject constructor(
     fun fetchReadme(owner:String, repo:String) = viewModelScope.launch {
 
         withContext(Dispatchers.IO){
-            getReadmeUseCase.invoke(owner,repo).onEach { result ->
-                when(result){
-
+            getReadmeUseCase.invoke(owner,repo).onEach {
+                when(it){
                     is Resources.Success -> {
-                        viewState.value = ViewState.success(result.data)
+                        viewState.value = ViewState.success(it.data)
                     }
                     is Resources.Error -> {
-                        viewState.value = ViewState.error(result.message)
+                        viewState.value = ViewState.error(it.message)
                     }
                     is Resources.Loading -> {
                         viewState.value = ViewState.loading()

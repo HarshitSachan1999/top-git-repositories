@@ -9,8 +9,8 @@ import com.example.gitrepo.domain.model.Repo
 import com.example.gitrepo.domain.repository.RepoRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import java.lang.Exception
 import javax.inject.Inject
+
 
 class RepoRepositoryImpl @Inject constructor(private val api:RepoApi) : RepoRepository {
     override suspend fun getRepos(): Flow<Resources<List<Repo>>> = flow {

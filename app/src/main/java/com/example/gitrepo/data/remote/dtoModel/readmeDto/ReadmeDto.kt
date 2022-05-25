@@ -19,6 +19,7 @@ data class ReadmeDto(
 
 fun ReadmeDto.toReadme(): Readme {
     return Readme(
+        download_url = html_url,
         content = content
     )
 }

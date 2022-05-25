@@ -1,12 +1,16 @@
 package com.example.gitrepo.app.repoDetails
 
-import android.R.attr
+import android.annotation.SuppressLint
+import android.graphics.Bitmap
 import android.os.Bundle
-import android.text.method.ScrollingMovementMethod
-import android.util.Base64
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.gitrepo.R
@@ -14,7 +18,6 @@ import com.example.gitrepo.ViewState
 import com.example.gitrepo.app.repoDetails.presentation.RepoDetailViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_repo_details.*
-import java.nio.charset.StandardCharsets
 
 
 @AndroidEntryPoint
@@ -41,22 +44,53 @@ class RepoDetailsFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_repo_details, container, false)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         star_count.text = "⭐: $starCount"
-        readme_text.movementMethod = ScrollingMovementMethod()
+        webView.isEnabled = false
+        webView.isClickable = false
 
         viewModel.fetchReadme(owner, repo)
         viewModel.viewState.observe(requireActivity(), {
             if (it.status == ViewState.Status.SUCCESS) {
-                val text:String? = it.data?.content
-                val data: ByteArray = Base64.decode(text, Base64.DEFAULT)
-                readme_text.text = String(data, StandardCharsets.UTF_8)
+                val url:String = it.data?.download_url!!
+                loadReadme(url)
+
             }else if (it.status == ViewState.Status.ERROR){
-                readme_text.text = "Something went wrong"
+                Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show()
             }
         })
+    }
 
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun loadReadme(currUrl:String){
+        webView.settings.javaScriptEnabled = true
+        webView.settings.cacheMode = WebSettings.LOAD_DEFAULT
+
+        webView.webViewClient = object : WebViewClient() {
+
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+                activity?.title = "Loading..."
+            }
+
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                activity?.setTitle(R.string.app_name)
+            }
+
+            override fun shouldOverrideKeyEvent(view: WebView?, event: KeyEvent?): Boolean {
+                return false
+            }
+
+            override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+                if (url == currUrl) {
+                    view?.loadUrl(url)
+                }
+                return true
+            }
+        }
+        webView.loadUrl(currUrl)
     }
 }
